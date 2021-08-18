@@ -17,6 +17,7 @@ const usersSchema = new Schema({
     },
   hashedPassword: String,
   tosAgreement: Boolean,
+  checks:Array
 });
 
 //tokens schema

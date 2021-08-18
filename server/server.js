@@ -4,10 +4,7 @@
 
 // DEPENDENCIES
 const http = require("http");
-const https = require('https')
 const config = require('../config')
-const fs = require('fs')
-const path = require('path')
 const handlerAPI = require('./handlersAPI')
 const handlerHTML = require('./handlerHTML')
 const {URL} = require("url");

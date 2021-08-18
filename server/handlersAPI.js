@@ -9,19 +9,7 @@ const _data = require("../lib/data");
 const helpers = require("../lib/helpers");
 const {URL} = require('url')
 const dns = require('dns')
-const { performance, PerformanceObserver } = require('perf_hooks');
-const util = require('util');
-//const debug = util.debuglog('performance')
-/* 
-//DEFINE THE PERFORMANCE OBSERVER
-const obs = new PerformanceObserver((perfObserverList, observer) => {
-      perfObserverList.getEntriesByType('measure').forEach(measure => {
-        debug('\x1b[33m%s\x1b[0m', measure.name+' '+measure.duration)
-      })
-  
-  observer.disconnect();
-});
-obs.observe({ type: 'measure' }); */
+const { usersModel, tokensModel, checksModel, logsModel} = require('../models')
 
 //defining CONST handlers and router
 const handler = {};
@@ -52,7 +40,7 @@ handler._users = {};
 // users-post
 //Required data: firstName, lastName, phone, password, tosAgreement
 //Optional data: none
-handler._users.post = function (data, callback) {
+handler._users.post = async function (data, callback) {
   //Check that all required fields are filled out
   const firstName =
     typeof data.payload.firstName == "string" &&
@@ -80,36 +68,38 @@ handler._users.post = function (data, callback) {
 
   if (firstName && lastName && password && phone && tosAgreement) {
     //Make sure that the user doesnt already exist
-    _data.read("users", phone, function (err, data) {
-      if (err) {
-        // Hash the password
-        const hashedPasswor = helpers.hash(password);
-        if (hashedPasswor) {
-          // create the user Object
-          const userObject = {
-            firstName: firstName,
-            lastName: lastName,
-            phone: phone,
-            hashedPassword: hashedPasswor,
-            tosAgreement: true,
-          };
+   let prevUser = false
+   try {
+     prevUser = await usersModel.findOne({phone: phone})
+   } catch (error) {
+     callback(500, {Eror:" connecting to data base"})
+   }
+   if (!prevUser) {
+    // Hash the password
+    const hashedPasswor = helpers.hash(password);
+    if (hashedPasswor) {
+      // create the user Object
+      const userObject = new usersModel({
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        hashedPassword: hashedPasswor,
+        tosAgreement: true,
+      });
+      // store the user
 
-          // store the user
-          _data.create("users", phone, userObject, function (err) {
-            if (!err) {
-              callback(200);
-            } else {
-              console.error(err);
-              callback(400, { Error: "Could not create the nue user" });
-            }
-          });
-        } else {
-          callback(500, { Error: "Could not hash the users password" });
-        }
-      } else {
-        callback(400, { Error: "User already exist" });
-      }
-    });
+      userObject.save()
+        .then(()=>{
+          callback(200);
+        }).catch(err=>{
+          callback(400, { Error: "Could not create the nue user" });
+        })
+    } else {
+      callback(500, { Error: "Could not hash the users password" });
+    } 
+  } else {
+    callback(400, { Error: "User already exist" });
+   }
   } else {
     callback(400, { Error: "Missing required fields, or one or some of them don´t fit the contract. Probably the Phone number" });
   }
@@ -117,7 +107,7 @@ handler._users.post = function (data, callback) {
 //users-get
 // Required data: phone
 // Optional data: none
-handler._users.get = function (data, callback) {
+handler._users.get = async function (data, callback) {
   //Check that the phone number is valid
   const phone =
     typeof data.queryStringObject.get("phone") == "string" &&
@@ -129,18 +119,17 @@ handler._users.get = function (data, callback) {
     const token =
       typeof data.headers.token == "string" ? data.headers.token : false;
 
-    handler._tokens.verifyToken(token, phone, function (tokenIsValid) {
+    handler._tokens.verifyToken(token, phone, async function (tokenIsValid) {
       if (tokenIsValid) {
         // Look up the user
-        _data.read("users", phone, function (err, data) {
-          if (!err && data) {
-            // removed the hashed password from the user object
-            delete data.hashedPassword;
-            callback(200, data);
-          } else {
-            callback(404);
-          }
-        });
+        try {
+          const user= await usersModel.findOne({phone:phone})
+          // removed the hashed password from the user object
+          delete user.hashedPassword
+          callback(200, data)
+        } catch (error) {
+          callback(404);
+        }
       } else {
         callback(403, {
           Error: "Missing required field token in headers or token invalid",
@@ -154,7 +143,7 @@ handler._users.get = function (data, callback) {
 //users-put
 //Required data: phone + 1 optional data
 //Optional data: firstName, lastName, password
-handler._users.put = function (data, callback) {
+handler._users.put = async function (data, callback) {
   // Check the required fields
   const phone =
     typeof data.payload.phone == "string" &&
@@ -186,38 +175,33 @@ handler._users.put = function (data, callback) {
       const token =
         typeof data.headers.token == "string" ? data.headers.token : false;
 
-      handler._tokens.verifyToken(token, phone, function (tokenIsValid) {
+      handler._tokens.verifyToken(token, phone, async function (tokenIsValid) {
         if (tokenIsValid) {
           // Look up the user
-          _data.read("users", phone, function (err, userData) {
-            if (!err && userData) {
-              if (firstName) {
-                userData.firstName = firstName;
-              }
-              if (lastName) {
-                userData.lastName = lastName;
-              }
-              if (password) {
-                userData.hashedPassword = helpers.hash(password);
-              }
-
-              // persist new data
-              _data.update("users", phone, userData, function (err) {
-                if (!err) {
-                  callback(200);
-                } else {
-                  console.error(err);
-                  callback(500, { Error: "Could not update the user" });
-                }
-              });
-            } else {
-              callback(404, { Error: "Specified User does not exist" });
+          try {
+            const user = await usersModel.findOne({phone:phone})
+            if (firstName) {
+              user.firstName = firstName;
             }
-          });
+            if (lastName) {
+              user.lastName = lastName;
+            }
+            if (password) {
+              user.hashedPassword = helpers.hash(password);
+            }
+            // persist new data
+            user.save()
+              .then(()=>{
+                callback(200);
+              })
+              .catch( err => {
+                callback(500, { Error: "Could not update the user" });
+              })
+          } catch (error) {
+            callback(404, { Error: "Specified User does not exist" });
+          }
         } else {
-          callback(403, {
-            Error: "Missing required field token in headers or token invalid",
-          });
+          callback(403, { Error: "Missing required field token in headers or token invalid"});
         }
       });
     } else {
@@ -230,7 +214,7 @@ handler._users.put = function (data, callback) {
 
 //users-delete
 // Required data: phone
-handler._users.delete = function (data, callback) {
+handler._users.delete = async function (data, callback) {
   //Check that the phone number is valid
   const phone =
     typeof data.queryStringObject.get("phone") == "string" &&
@@ -242,47 +226,32 @@ handler._users.delete = function (data, callback) {
     const token =
       typeof data.headers.token == "string" ? data.headers.token : false;
 
-    handler._tokens.verifyToken(token, phone, function (tokenIsValid) {
+    handler._tokens.verifyToken(token, phone, async function (tokenIsValid) {
       if (tokenIsValid) {
         // Look up the user
-        _data.read("users", phone, function (err, data) {
-          if (!err && data) {
-            const userChecks = Array.isArray(data.checks) ? data.checks : [];
-            _data.delete("users", phone, function (err) {
-              if (!err) {
-                // Delete Checks
-                if (userChecks.length > 0) {
-                  let deletedChecksCountDown = userChecks.length;
-                  let deletionErrors = false;
-                  userChecks.forEach((id) => {
-                    //Delete by id
-                    _data.delete("checks", id, function (err) {
-                      if (!err) {
-                        deletedChecksCountDown = deletedChecksCountDown - 1;
-                      } else {
-                        deletionErrors = true;
-                      }
-                      if (!deletionErrors && deletedChecksCountDown === 0) {
-                        callback(200);
-                      } 
-                      if (deletionErrors && deletedChecksCountDown === 0){
-                        callback(500, {
-                          Error: "Not all checks of the user, were deleted",
-                        });
-                      }
-                    });
-                  });
-                } else {
-                  callback(200);
-                }
-              } else {
-                callback(500, { Error: "Could not delete the specified user" });
-              }
-            });
+        try {
+          const user = await usersModel.findOne({phone:phone})
+          const userChecks = Array.isArray(user.checks) ? user.checks : [];
+          const answer = await usersModel.deleteOne({phone:phone})
+          if(userChecks.length > 0){
+            userChecks.forEach(check => {
+              checksModel.deleteOne({id:check})
+            })
+            if (answer.ok === 1) {
+              callback(200)
+            } else {
+              callback(500, {Error:"The user wasn´t properly deleted"})
+            }
           } else {
-            callback(404, { Error: "Could not find the specified user" });
+            if (answer.ok === 1) {
+              callback(200)
+            } else {
+              callback(500, {Error:"The user wasn´t properly deleted"})
+            }
           }
-        });
+        } catch (error) {
+          callback(404, { Error: "Could not find the specified user" });
+        }
       } else {
         callback(403, {
           Error: "Missing required field token in headers or token invalid",
@@ -314,9 +283,9 @@ handler._tokens = {};
 // tokens-post
 //Required data: phone, password
 //Optional data: none
-handler._tokens.post = function (data, callback) {
+handler._tokens.post = async function (data, callback) {
   //Check that all required fields are filled out
-  performance.mark('entered post token function')
+  
   const phone =
     typeof data.payload.phone == "string" &&
     data.payload.phone.trim().length === 11 // check this line to integrate a universal use of phone numbers
@@ -327,55 +296,45 @@ handler._tokens.post = function (data, callback) {
     data.payload.password.trim().length > 0
       ? data.payload.password.trim()
       : false;
-  performance.mark('begining user lookup post token')
+  
   if (password && phone) {
-    //Make sure that the user doesnt already exist
-    _data.read("users", phone, function (err, userData) {
-      performance.mark('user lookup complete')
-      if (!err && userData) {
-        // Hash the password
-        performance.mark('begining password hashing')
-        const hashedPasswor = helpers.hash(password);
-        performance.mark('password hashing complete')
-        if (hashedPasswor === userData.hashedPassword) {
-          // create a new token with a random name and an expiration of 1 hour
-          performance.mark('building the data for the token')
-          const tokenID = helpers.createRandomString(20);
-          const expires = Date.now() + 1000 * 60 * 60;
+    //Make sure that the user phone and password match
+    try {
+      const user = await usersModel.findOne({phone:phone})
+      // Hash the password
+      
+      const hashedPasswor = helpers.hash(password);
+      
+      if (hashedPasswor === user.hashedPassword) {
+        // create a new token with a random name and an expiration of 1 hour
+        
+        const tokenID = helpers.createRandomString(20);
+        const expires = Date.now() + 1000 * 60 * 60;
 
-          const tokenObject = {
-            phone: phone,
-            id: tokenID,
-            expires: expires,
-          };
-          performance.mark('begining storing token')
-          //Store the token
-          _data.create("tokens", tokenID, tokenObject, function (err) {
-            performance.mark('storing token  complete')
+        const tokenObject = new tokensModel({
+          phone: phone,
+          id: tokenID,
+          expires: expires,
+        });
+        
+        //Store the token
+        tokenObject.save()
+          .then(()=>{
 
-            //GATHER all the performance
-            performance.measure('Begining to end', 'entered post token function','storing token  complete')
-            performance.measure('Validating user input', 'entered post token function', 'begining user lookup post token')
-            performance.measure('user lookup', 'begining user lookup post token','user lookup complete' )
-            performance.measure('password hashing', 'begining password hashing','password hashing complete' )
-            performance.measure('token data creation', 'building the data for the token','begining storing token' )
-            performance.measure('token storing', 'begining storing token','storing token  complete' )
-
-            if (!err) {
-              callback(200, tokenObject);
-            } else {
-              callback(500, { Error: "Could not create the token" });
-            }
-          });
-        } else {
-          callback(400, {
-            Error: "Password did not match specified user password",
-          });
-        }
+            callback(200, tokenObject);
+          })
+          .catch(err=>{
+            callback(500, { Error: "Could not create the token" });
+          })
+       
       } else {
-        callback(400, { Error: "Could not find specified user" });
+        callback(400, {
+          Error: "Password did not match specified user password",
+        });
       }
-    });
+    } catch (error) {
+      callback(400, { Error: "Could not find specified user" });
+    }
   } else {
     callback(400, { Error: "Missing required fields" });
   }
@@ -383,7 +342,7 @@ handler._tokens.post = function (data, callback) {
 // tokens-get
 // Required data: id
 // Optional data: none
-handler._tokens.get = function (data, callback) {
+handler._tokens.get = async function (data, callback) {
   //Check that the id is valid
   const id =
     typeof data.queryStringObject.get("id") == "string" &&
@@ -392,13 +351,12 @@ handler._tokens.get = function (data, callback) {
       : false;
   if (id) {
     // Look up the token
-    _data.read("tokens", id, function (err, tokenData) {
-      if (!err && tokenData) {
-        callback(200, tokenData);
-      } else {
-        callback(404, { Error: "did not find that token" });
-      }
-    });
+    try {
+      const token = await tokensModel.findOne({id:id})
+      callback(200, token);
+    } catch (error) {
+      callback(404, { Error: "did not find that token" });
+    }
   } else {
     callback(400, { Error: "Missing required field" });
   }
@@ -406,7 +364,7 @@ handler._tokens.get = function (data, callback) {
 //tokens-put
 //Required data: id, extend
 //Optional data: none
-handler._tokens.put = function (data, callback) {
+handler._tokens.put = async function (data, callback) {
   //Check that the id is valid
   const id =
     typeof data.payload.id == "string" && data.payload.id.trim().length === 20
@@ -416,29 +374,28 @@ handler._tokens.put = function (data, callback) {
   // Check for the optional fields
   if (id && extend) {
     // Look up the token
-    _data.read("tokens", id, function (err, tokenData) {
-      if (!err && tokenData) {
-        // check that the token is still valid
-        if (tokenData.expires > Date.now()) {
-          // set the new extension
-          tokenData.expires = Date.now() + 1000 * 60 * 60;
-          //store the token again
-          _data.update("tokens", id, tokenData, function (err) {
-            if (!err) {
-              callback(200, { Message: "Token valid for 1 more hour" });
-            } else {
-              callback(500, { Error: "Could not extend the token" });
-            }
-          });
-        } else {
-          callback(400, {
-            Error: "The token has already expired and can´t be extended",
-          });
-        }
+    try {
+      const tokenData = await tokensModel.findOne({id:id})
+      // check that the token is still valid
+      if (tokenData.expires > Date.now()) {
+        // set the new extension
+        tokenData.expires = Date.now() + 1000 * 60 * 60;
+        //store the token again
+        tokenData.save()
+          .then(()=>{
+            callback(200, { Message: "Token valid for 1 more hour" });
+          })
+          .catch(err =>{
+            callback(500, { Error: "Could not extend the token" });
+          })
       } else {
-        callback(400, { Error: "That token does not exist" });
+        callback(400, {
+          Error: "The token has already expired and can´t be extended",
+        });
       }
-    });
+    } catch (error) {
+      callback(400, { Error: "That token does not exist" });
+    }
   } else {
     callback(400, { Error: "Missing required fields or they are invalid" });
   }
@@ -446,7 +403,7 @@ handler._tokens.put = function (data, callback) {
 
 // tokens-delete
 // Required data: id
-handler._tokens.delete = function (data, callback) {
+handler._tokens.delete = async function (data, callback) {
   //Check that the id is valid
   const id =
     typeof data.queryStringObject.get("id") == "string" &&
@@ -455,39 +412,36 @@ handler._tokens.delete = function (data, callback) {
       : false;
   if (id) {
     // Look up the token
-    _data.read("tokens", id, function (err, tokenData) {
-      if (!err && tokenData) {
-        // delete the file
-        _data.delete("tokens", id, function (err) {
-          if (!err) {
-            callback(200);
-          } else {
-            callback(500, { Error: "Could not delete the specified token" });
-          }
-        });
+    try {
+      const tokenData = await tokensModel.findOne({id:id})
+      // delete the file
+      const answer = await tokensModel.deleteOne({id:id})
+      if (answer.ok === 1) {
+        callback(200);
       } else {
-        callback(404, { Error: "Could not find the specified token" });
+        callback(500, { Error: "Could not delete the specified token" });
       }
-    });
+    } catch (error) {
+      callback(404, { Error: "Could not find the specified token" });
+    }
   } else {
     callback(400, { Error: "Missing required field" });
   }
 };
 
-handler._tokens.verifyToken = function (id, phone, booleanCallback) {
+handler._tokens.verifyToken = async function (id, phone, booleanCallback) {
   //look up the token
-  _data.read("tokens", id, function (err, tokenData) {
-    if (!err && tokenData) {
-      //Check if the token is for the current user
-      if (tokenData.phone === phone && tokenData.expires > Date.now()) {
-        booleanCallback(true);
-      } else {
-        booleanCallback(false);
-      }
+  try {
+    const token = await tokensModel.findOne({id:id})
+    //Check if the token is for the current user
+    if (token.phone === phone && token.expires > Date.now()) {
+      booleanCallback(true);
     } else {
       booleanCallback(false);
     }
-  });
+  } catch (error) {
+    booleanCallback(false)
+  }
 };
 
 /************************************************
@@ -510,7 +464,7 @@ handler._checks = {};
 // Checks - post
 // Required data: protocol, url, method, successCodes, TimeOut seconds
 // Optional data: none
-handler._checks.post = function (data, callback) {
+handler._checks.post = async function (data, callback) {
   //Validate inputs
   const protocol =
     typeof data.payload.protocol == "string" &&
@@ -547,78 +501,75 @@ handler._checks.post = function (data, callback) {
       typeof data.headers.token == "string" ? data.headers.token : false;
 
     // Look up the user by reading the token
-    _data.read("tokens", token, function (err, tokenData) {
-      if (!err && tokenData) {
-        const userPhone = tokenData.phone;
+    try {
+      const tokenData = await tokensModel.findOne({id:token})
+      const phone = tokenData.phone;
 
-        //look up the user data
-        _data.read("users", userPhone, function (err, userData) {
-          if (!err && userData) {
-            const userChecks = Array.isArray(userData.checks)
-              ? userData.checks
-              : [];
+      //look up the user data
+      try {
+        const userData = await usersModel.findOne({phone:phone})
+        const userChecks = Array.isArray(userData.checks)
+        ? userData.checks
+        : [];
 
-            if (userChecks.length < config.maxChecks) {
-              // Create a random id for the check
-              const checkId = helpers.createRandomString(20);
+        if (userChecks.length < config.maxChecks) {
+          // Create a random id for the check
+          const checkId = helpers.createRandomString(20);
 
-              //BEFORE BLIDINGLY CREATE A CHECK ON A URL THAT MAY NOT EXIST, LETS CHECK IT WITH DNS entries
-              const parsedURL = new URL({ toString: () => protocol+'://'+url });
-              const hostname = typeof(parsedURL.hostname)=='string' && parsedURL.hostname.length >0 ? parsedURL.hostname: false
+          //BEFORE BLIDINGLY CREATE A CHECK ON A URL THAT MAY NOT EXIST, LETS CHECK IT WITH DNS entries
+          const parsedURL = new URL({ toString: () => protocol+'://'+url });
+          const hostname = typeof(parsedURL.hostname)=='string' && parsedURL.hostname.length >0 ? parsedURL.hostname: false
 
-              dns.resolve(hostname, function(err, adressList) {
-                if (!err && adressList) {
-                      // Create the check object and include the users phone
-                  const checkObject = {
-                    id: checkId,
-                    protocol: protocol,
-                    userPhone: userPhone,
-                    url: url,
-                    method: method,
-                    successCodes: successCodes,
-                    timeoutSeconds: timeoutSeconds,
-                  };
-
-                  // Save this object
-                  _data.create("checks", checkId, checkObject, function (err) {
-                    if (!err) {
-                      // Add the check ID to the users object
-                      userData.checks = userChecks;
-                      userData.checks.push(checkId);
-
-                      // persist new user check
-                      _data.update("users", userPhone, userData, function (err) {
-                        if (!err) {
-                          callback(200, checkObject);
-                        } else {
-                          callback(500, {
-                            Error: "Could not update the user new check",
-                          });
-                        }
-                      });
-                    } else {
-                      callback(500, { Error: "Could not create the new check" });
-                    }
-                  });
-                } else {
-                  callback(400, {Error: 'The URL that you entered didn´t resolve to any DNS entries'})
-                }
-              })
-            } else {
-              callback(400, {
-                Error:
-                  "The user already got the maximum number of checks: " +
-                  config.maxChecks,
+          dns.resolve(hostname, async function(err, adressList) {
+            if (!err && adressList) {
+             // Create the check object and include the users phone
+              const checkObject = new checksModel({
+                id: checkId,
+                protocol: protocol,
+                userPhone: phone,
+                url: url,
+                method: method,
+                successCodes: successCodes,
+                timeoutSeconds: timeoutSeconds,
               });
+              //sAVE THE CHECK
+              try {
+                const answerCheckCreation = await checkObject.save()
+                // Add the check ID to the users object
+                userData.checks = userChecks;
+                userData.checks.push(checkId);
+
+                userData.save()
+                  .then(()=>{
+                    delete answerCheckCreation._id
+                    delete answerCheckCreation.__v
+                    callback(200, answerCheckCreation);
+                  })
+                  .catch(err=>{
+                    callback(500, {
+                      Error: "Could not update the user new check",
+                    });
+                  })
+              } catch (error) {
+                callback(500, { Error: "Could not create the new check" });
+              }
+            } else {
+              callback(400, {Error: 'The URL that you entered didn´t resolve to any DNS entries'})
             }
-          } else {
-            callback(403);
-          }
-        });
-      } else {
-        callback(403, { Error: "No Token or invalid token" });
+          })
+        } else {
+          callback(400, {
+            Error:
+              "The user already got the maximum number of checks: " +
+              config.maxChecks,
+          });
+        }
+      } catch (error) {
+        callback(403);
       }
-    });
+    } catch (error) {
+      callback(403, { Error: "No Token or invalid token" });
+    }
   } else {
     callback(400, { Error: "Missing required inputs, or inputs are invalid" });
   }
@@ -627,7 +578,7 @@ handler._checks.post = function (data, callback) {
 // checks-get
 // Required data: id
 // Optional data: none
-handler._checks.get = function (data, callback) {
+handler._checks.get = async function (data, callback) {
   //Check that the id is valid
   const id =
     typeof data.queryStringObject.get("id") == "string" &&
@@ -636,29 +587,22 @@ handler._checks.get = function (data, callback) {
       : false;
   if (id) {
     //Look up the check
-    _data.read("checks", id, function (err, checkData) {
-      if (!err && checkData) {
-        // Look up the token
-        const token =
-          typeof data.headers.token == "string" ? data.headers.token : false;
-        //verify that token is valid
-        handler._tokens.verifyToken(
-          token,
-          checkData.userPhone,
-          function (tokenIsValid) {
-            if (tokenIsValid) {
-              callback(200, checkData);
-            } else {
-              callback(403, {
-                Error: "No token in the headers or Token is not valid",
-              });
-            }
-          }
-        );
-      } else {
-        callback(404, { Error: "Could not find that check" });
-      }
-    });
+    try {
+      const checkData = await checksModel.findOne({id:id})
+      // Look up the token
+      const token =
+        typeof data.headers.token == "string" ? data.headers.token : false;
+      //verify that token is valid
+      handler._tokens.verifyToken(token, checkData.userPhone, function (tokenIsValid) {
+        if (tokenIsValid) {
+          callback(200, checkData);
+        } else {
+          callback(403, { Error: "No token in the headers or Token is not valid"});
+        }
+      });
+    } catch (error) {
+      callback(404, { Error: "Could not find that check" });      
+    }
   } else {
     callback(400, { Error: "Missing required field" });
   }
@@ -666,7 +610,7 @@ handler._checks.get = function (data, callback) {
 //checks-put
 //Required data: check id + 1 optional data
 //Optional data: protocol, url, method, successCodes, timeoutSeconds
-handler._checks.put = function (data, callback) {
+handler._checks.put = async function (data, callback) {
   //Check that the id is valid
   const id =
     typeof data.payload.id == "string" && data.payload.id.trim().length === 20
@@ -703,51 +647,44 @@ handler._checks.put = function (data, callback) {
       : false;
   if (id && (protocol || url || method || successCodes || timeoutSeconds)) {
     // Look up the check
-    _data.read("checks", id, function (err, checkData) {
-      if (!err && checkData) {
-        // Look up the token
-        const token =
-          typeof data.headers.token == "string" ? data.headers.token : false;
-        handler._tokens.verifyToken(
-          token,
-          checkData.userPhone,
-          function (isValidToken) {
-            if (isValidToken) {
-              // update the check
-              if (protocol) {
-                checkData.protocol = protocol;
-              }
-              if (url) {
-                checkData.url = url;
-              }
-              if (method) {
-                checkData.method = method;
-              }
-              if (successCodes) {
-                checkData.successCodes = successCodes;
-              }
-              if (timeoutSeconds) {
-                checkData.timeoutSeconds = timeoutSeconds;
-              }
-              // persist new changes
-              _data.update("checks", id, checkData, function (err) {
-                if (!err) {
-                  callback(200);
-                } else {
-                  callback(500, { Error: "Could not update the check" });
-                }
-              });
-            } else {
-              callback(400, {
-                Error: "No Token in the headers or invalid token",
-              });
-            }
+    try {
+      const checkData = await checksModel.findOne({id:id})
+      // Look up the token
+      const token =
+      typeof data.headers.token == "string" ? data.headers.token : false;
+      handler._tokens.verifyToken(token, checkData.userPhone, function (isValidToken) {
+        if (isValidToken) {
+          // update the check
+          if (protocol) {
+            checkData.protocol = protocol;
           }
-        );
-      } else {
-        callback(404, { Error: "No Checks with that ID" });
-      }
-    });
+          if (url) {
+            checkData.url = url;
+          }
+          if (method) {
+            checkData.method = method;
+          }
+          if (successCodes) {
+            checkData.successCodes = successCodes;
+          }
+          if (timeoutSeconds) {
+            checkData.timeoutSeconds = timeoutSeconds;
+          }
+          // persist new changes
+          checkData.save()
+            .then(()=>{
+              callback(200);
+            })
+            .catch(err=>{
+              callback(500, { Error: "Could not update the check" });
+            })
+        } else {
+          callback(400, {Error: "No Token in the headers or invalid token" });
+        }
+      });
+    } catch (error) {
+      callback(404, { Error: "No Checks with that ID" });
+    }
   } else {
     callback(400, { Error: "Missing required fields or they are invalid" });
   }
@@ -755,7 +692,7 @@ handler._checks.put = function (data, callback) {
 
 // checks-delete
 // Required data: id
-handler._checks.delete = function (data, callback) {
+handler._checks.delete = async function (data, callback) {
   //Check that the id is valid
   const id =
     typeof data.queryStringObject.get("id") == "string" &&
@@ -764,60 +701,49 @@ handler._checks.delete = function (data, callback) {
       : false;
   if (id) {
     // Look up the check
-    _data.read("checks", id, function (err, checkData) {
-      if (!err && checkData) {
-        // Look up the token
-        const token =
-          typeof data.headers.token == "string" ? data.headers.token : false;
-        handler._tokens.verifyToken(
-          token,
-          checkData.userPhone,
-          function (isValidToken) {
-            if (isValidToken) {
-              const phone = checkData.userPhone;
-              //Delete the checks data
-              _data.delete("checks", id, function (err) {
-                if (!err) {
-                  // Get user to modify
-                  _data.read("users", phone, function (err, userData) {
-                    if (!err && userData) {
-                      const oldChecks = Array.isArray(userData.checks)
-                        ? [...userData.checks]
-                        : [];
-                      const newChecks = oldChecks.filter((e) => e !== id);
-                      userData.checks = newChecks;
-                      _data.update("users", phone, userData, function (err) {
-                        if (!err) {
-                          callback(200);
-                        } else {
-                          callback(500, {
-                            Error:
-                              "Could not update the new users info. Contact the server manager",
-                          });
-                        }
-                      });
+    try {
+      const checkData = await checksModel.findOne({id:id})
+      // Look up the token
+      const token =
+      typeof data.headers.token == "string" ? data.headers.token : false;
+      handler._tokens.verifyToken(token, checkData.userPhone, async function (isValidToken) {
+        if (isValidToken) {
+          const phone = checkData.userPhone;
+          //Delete the checks data
+          try {
+            const answerCheckDestroyed = await checksModel.deleteOne({id:id})
+            // Get user to modify
+            try {
+              const userData = await usersModel.findOne({phone:phone})
+              const oldChecks = Array.isArray(userData.checks)
+                  ? [...userData.checks]
+                  : [];
+                const newChecks = oldChecks.filter((e) => e !== id);
+                userData.checks = newChecks;
+                userData.save()
+                  .then(()=>{
+                    if (answerCheckDestroyed.ok===1) {
+                      callback(200)
                     } else {
-                      callback(500, {
-                        Error:
-                          "Could not delete the check on users info. Contact the server manager",
-                      });
+                      callback(500,{Error:"Unexpected error, checks deleted in users info but check not deleted"})  
                     }
-                  });
-                } else {
-                  callback(500, { Error: "Could not delete the check" });
-                }
-              });
-            } else {
-              callback(400, {
-                Error: "No Token in the headers or invalid token",
-              });
+                  })
+                  .catch(err=>{
+                    callback(500, {Error:"Could not update the new users info. Contact the server manager"});
+                  })
+            } catch (error) {
+              callback(500, {Error:"Could not delete the check on users info. Contact the server manager" });
             }
+          } catch (error) {
+            callback(500, { Error: "Could not delete the check" });
           }
-        );
-      } else {
-        callback(404, { Error: "No checks with that id" });
-      }
-    });
+        } else {
+          callback(400, {Error: "No Token in the headers or invalid token" });
+        }
+      });
+    } catch (error) {
+      callback(404, { Error: "No checks with that id" });
+    }
   } else {
     callback(400, { Error: "Missing required field" });
   }

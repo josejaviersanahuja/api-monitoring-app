@@ -21,21 +21,28 @@ database["We can post users correctly"] = function (done) {
     })
 
     user1.save()
-        .then(()=>{
+        .then((user)=>{
             assert.strictEqual(1, 1)
             done()
         }).catch(err=>{
-            console.log(err);
             assert.strictEqual(1, 2)
             done()
         })
 };
  //we can get a user by phone
 database["We can get the user"] = async function(done){
-    const user = await usersModel.findOne({phone:"34664531802"})
-    assert.ok(user)
-    assert.strictEqual(user.phone, "34664531802")
-    done()
+    try {
+        const user = await usersModel.findOne({phone:"34664531802"})
+        assert.ok(user)
+        assert.strictEqual(user.phone, "34664531802")
+        done()
+    } catch (error) {
+        const user =false
+        assert.ok(user)
+        assert.strictEqual(user.phone, "34664531802")
+        done()
+    }
+    
 }
  
  //we can update a user
