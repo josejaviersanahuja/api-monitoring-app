@@ -1,0 +1,23 @@
+{
+  "name": "api-monitoring-app",
+  "version": "1.0.0",
+  "description": "A server dedicated for monitoring urls",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test",
+    "build":"node index.js",
+    "dev":"node index.js"
+  },
+  "keywords": [
+    "raw-node"
+  ],
+  "author": "zitrojjdev",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^5.13.7"
+  }
+}

@@ -1,0 +1,40 @@
+
+<h1 class="title">Login To Your Account</h1>
+
+<div class="form__wrapper">
+  <hr/>
+  <h2 class="subtitle">Enter your phone number and password</h2>
+  <form class="form" id="sessionCreate" action="/api/tokens" method="POST">
+    <fieldset class="form__fieldset">
+      <legend>Phone and password</legend>
+      <div class="form__fromError"></div>
+      <div class="form__inputWrapper">
+        <div class="form__inputLabel">Phone Number (with country code)</div>
+        <span id="form__plus">+</span>
+        <input
+          type="text"
+          name="phone"
+          placeholder="34666666666 eleven digits"
+          onkeyup="handleLogInButton()"
+        />
+        <span id="form__validPhone" style="visibility:hidden;">OK</span>
+      </div>
+      <div class="form__inputWrapper">
+        <div class="form__inputLabel">Password</div>
+        <input
+          type="password"
+          name="password"
+          placeholder="password"
+          onkeyup="handleLogInButton()"
+        />
+      </div>
+      <div class="form__inputWrapper">
+        <button type="submit" class="cta blue" id="form__button" disabled>
+          Log In
+        </button>
+      </div>
+      </div>
+    </fieldset>
+  </form>
+</div>
+

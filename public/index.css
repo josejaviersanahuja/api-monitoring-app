@@ -1,0 +1,525 @@
+*, *::after, *::before {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #70C0FF;
+  color: #181818;
+  width: 100vw;
+  scroll-behavior: smooth;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+/* 
+    MIXINS PARA RESPONSIVENESS
+*/
+.signup {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.signup::-webkit-scrollbar {
+  display: none;
+  width: min-content;
+}
+
+.form__wrapper {
+  margin: 1rem 0;
+  width: 80%;
+  max-width: 500px;
+}
+
+.form__fieldset {
+  max-width: 500px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+.form__fieldset legend {
+  font-weight: 700;
+  background-color: #e6e6e6;
+  border: 1px solid #181818;
+  border-radius: 5px;
+  padding: 0.3rem;
+}
+.form__inputWrapper {
+  margin: 0.5rem 0;
+}
+.form__inputLabel {
+  font-weight: 700;
+  margin: 1rem 1rem 0 1rem;
+}
+
+#form__fromError, .form__fromSucces, .form__fromError, .form__warning {
+  background-color: #6b8e23;
+  color: white;
+  font-weight: 700;
+  border-radius: 10px;
+  margin: 1rem;
+  padding: 0.5rem;
+  display: none;
+}
+
+.form__warning {
+  display: block;
+}
+
+#form__button[disabled] {
+  opacity: 0.5;
+}
+
+#form__validPassword {
+  position: relative;
+  left: 12px;
+}
+
+input[name=confirmPassword] {
+  position: relative;
+  left: 12px;
+}
+
+input[name=phone] {
+  position: relative;
+  left: 5px;
+}
+
+input[type=hidden] {
+  width: 50%;
+}
+
+#form__plus {
+  position: relative;
+  left: 5px;
+}
+
+#form__validPhone {
+  position: relative;
+  left: 5px;
+}
+
+.index {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.index::-webkit-scrollbar {
+  display: none;
+  width: min-content;
+}
+
+.title {
+  margin-top: 1rem;
+}
+
+.subtitle {
+  margin: 1rem 0;
+}
+
+.blurb {
+  background-color: #e6e6e6;
+  max-width: 500px;
+  border-radius: 10px;
+  font-weight: 700;
+  margin: 1rem;
+  border: 1px solid #70C0FF;
+}
+.blurb li {
+  list-style: none;
+}
+
+.ctaWrapper {
+  max-width: 500px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: 1rem 0;
+}
+
+.cta {
+  border-radius: 10px;
+  padding: 0.5em;
+  font-size: 1.2em;
+  font-weight: 700;
+  text-decoration: none;
+  color: #181818;
+}
+
+.green {
+  background-color: #6b8e23;
+  transition: all 0.5s ease-in-out;
+}
+.green:hover {
+  box-shadow: 2px 2px 0 0 #181818;
+  color: white;
+  cursor: pointer;
+}
+.green:focus {
+  outline: none;
+  box-shadow: 2px 2px 0 0 #181818;
+  color: white;
+  cursor: pointer;
+}
+
+.blue {
+  background-color: #70C0FF;
+  transition: all 0.5s ease-in-out;
+}
+.blue:hover {
+  box-shadow: 2px 2px 0 0 #181818;
+  color: white;
+  cursor: pointer;
+}
+.blue:focus {
+  outline: none;
+  box-shadow: 2px 2px 0 0 #181818;
+  color: white;
+  cursor: pointer;
+}
+
+.red {
+  background-color: red;
+  transition: all 0.5s ease-in-out;
+}
+.red:hover {
+  box-shadow: 2px 2px 0 0 #181818;
+  color: white;
+  cursor: pointer;
+}
+.red:focus {
+  outline: none;
+  box-shadow: 2px 2px 0 0 #181818;
+  color: white;
+  cursor: pointer;
+}
+
+.border {
+  border: 1px solid #181818;
+  transition: all 0.5s ease-in-out;
+}
+.border:hover {
+  box-shadow: 2px 2px 0 0 #181818;
+  color: #6b8e23;
+  cursor: pointer;
+}
+.border:focus {
+  outline: none;
+  box-shadow: 2px 2px 0 0 #181818;
+  color: #6b8e23;
+  cursor: pointer;
+}
+
+.settings {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.settings::-webkit-scrollbar {
+  display: none;
+  width: min-content;
+}
+
+#updatePasswordBtn[disabled] {
+  opacity: 0.5;
+}
+
+#updateNameBtn[disabled] {
+  opacity: 0.5;
+}
+
+.login {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.login::-webkit-scrollbar {
+  display: none;
+  width: min-content;
+}
+
+.dashboard {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.dashboard::-webkit-scrollbar {
+  display: none;
+  width: min-content;
+}
+
+#checksListTable, tr, th, td {
+  color: #181818;
+  border-collapse: collapse;
+  border: 1px solid #181818;
+  margin: 0;
+  padding: 0.5rem;
+}
+
+#checksListTable .checkRow:nth-child(2n) {
+  background-color: white;
+}
+#checksListTable .checkRow:nth-child(2n+1) {
+  background-color: #e6e6e6;
+}
+#checksListTable td:nth-child(5n+4), #checksListTable td:nth-child(5n+1) {
+  font-weight: 700;
+}
+
+th {
+  background-color: #6b8e23;
+}
+
+#checksListTable {
+  width: 80%;
+  margin: 1rem 0 3rem 0;
+  border-radius: 10px;
+}
+
+#noChecksMessage, #createCheckCTA {
+  display: none;
+}
+
+.accountDeleted {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.accountDeleted::-webkit-scrollbar {
+  display: none;
+  width: min-content;
+}
+
+.createCheck {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.createCheck::-webkit-scrollbar {
+  display: none;
+  width: min-content;
+}
+
+.backButton {
+  border-radius: 10px;
+  padding: 0.5em;
+  font-size: 1.2em;
+  font-weight: 700;
+  text-decoration: none;
+  color: #181818;
+  float: left;
+  margin-bottom: -2rem;
+}
+
+.checkboxGroup {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+  place-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+.checkboxGroup .multiselect {
+  margin-right: auto;
+}
+.checkboxGroup .multiselect__span {
+  margin: 0 0.5rem;
+}
+
+/*
+#checksCreate
+
+
+.intval
+*/
+footer {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  width: 100vw;
+  background-color: rgba(24, 24, 24, 0.9);
+  color: white;
+  z-index: 2;
+}
+
+.copyright {
+  margin: 0 auto;
+}
+
+header {
+  background-color: rgba(24, 24, 24, 0.9);
+  color: white;
+}
+header li {
+  list-style: none;
+}
+
+.logo {
+  position: relative;
+  z-index: 2;
+}
+.logo img {
+  width: 200px;
+  height: 79px;
+}
+
+.menu__btn {
+  isolation: isolate;
+  position: relative;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: absolute;
+  z-index: 2;
+  top: 1.5rem;
+  right: 1rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background-color: #6b8e23;
+  display: flex;
+}
+.menu__btn__lines {
+  position: relative;
+  width: 20px;
+  height: 3px;
+  background-color: white;
+  margin: auto;
+}
+.menu__btn__lines::before {
+  content: " ";
+  position: absolute;
+  top: -8px;
+  right: 0;
+  width: 20px;
+  height: 3px;
+  background-color: #70C0FF;
+}
+.menu__btn__lines::after {
+  content: " ";
+  position: absolute;
+  top: 8px;
+  right: 0;
+  width: 20px;
+  height: 3px;
+  background-color: #70C0FF;
+}
+
+.menu {
+  background-color: rgba(24, 24, 24, 0.9);
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0;
+  z-index: 1;
+  backdrop-filter: blur(5px);
+  transition: all 0.5s ease-in-out;
+}
+.menu a {
+  text-decoration: none;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.5s ease-in-out;
+}
+.menu a:hover {
+  color: #70C0FF;
+}
+.menu li {
+  transition: all 0.5s ease-in-out;
+  transform: translateX(-100vw);
+}
+
+.open {
+  bottom: 50%;
+}
+.open li {
+  transform: translateX(0);
+}
+
+@media screen and (min-width: 768px) {
+  header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    color: white;
+    background-color: #181818;
+  }
+
+  .menu__btn {
+    display: none;
+  }
+
+  .menu {
+    position: relative;
+    top: 0;
+    bottom: 0;
+    flex-direction: row;
+    min-width: 500px;
+  }
+  .menu li {
+    transform: translateX(0);
+    margin: auto;
+  }
+}
+.when__loggedin {
+  display: none;
+}
+
+.when__loggedout {
+  display: block;
+}
+
+body.loggedIn .when__loggedin {
+  display: block;
+}
+body.loggedIn .when__loggedout {
+  display: none;
+}
+
+.cta {
+  margin: auto;
+}
+
+main {
+  min-height: 90vh;
+  text-align: center;
+  max-width: 1200px;
+  border: 1px solid #181818;
+  background-color: white;
+  color: #181818;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media screen and (min-width: 1200px) {
+  main {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 1px 1px 2px 3px black;
+  }
+}
+hr {
+  width: 100%;
+}
+
+/*# sourceMappingURL=index.css.map */

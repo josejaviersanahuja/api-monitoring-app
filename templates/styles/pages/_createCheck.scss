@@ -1,0 +1,33 @@
+@use '../abstracts/' as *;
+
+.createCheck {
+    @include mainBody;
+}
+
+.backButton {
+    @include linkButton;
+    float:left;
+    margin-bottom: -2rem; 
+}
+
+.checkboxGroup {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+    place-items: center;
+    gap: 0.5rem;
+    padding:1rem;
+    & .multiselect {
+        margin-right: auto;
+        &__span{
+            margin: 0 0.5rem;
+        }
+    }
+}
+
+
+/*
+#checksCreate
+
+
+.intval
+*/

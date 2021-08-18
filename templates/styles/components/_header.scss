@@ -1,0 +1,143 @@
+@use '../abstracts/' as *;
+header {
+    background-color: rgba($color: $primeColor, $alpha: 0.9);
+    color: $secondColor;
+
+    & li{
+        list-style: none;
+    }
+}
+
+.logo {
+    position: relative;
+    z-index: 2; 
+    & img {
+        width:200px;
+        height:79px;;
+    }
+}
+
+.menu__btn{
+    @include cleanBotonStyle;
+    position: absolute;
+    z-index: 2;
+    top: 1.5rem;
+    right:1rem;
+    width:30px;
+    height:30px;
+    border-radius: 5px;
+    background-color: $thirdColor;
+    display:flex;
+    &__lines {
+        position: relative;
+        width:20px;
+        height:3px;
+        background-color: $secondColor;
+        margin:auto;
+        &::before{
+            content: ' ';
+            position: absolute;
+            top:-8px;
+            right:0;
+            width:20px;
+            height:3px;
+            background-color: $fourthColor;  
+        }
+        &::after{
+            content: ' ';
+            position: absolute;
+            top:8px;
+            right:0;
+            width:20px;
+            height:3px;
+            background-color: $fourthColor;
+        }
+    }
+}
+
+.menu {
+    background-color: rgba($color: $primeColor, $alpha: 0.9);
+    position: absolute;
+    top:80px;
+    left:0;
+    right:0;
+    bottom: 90%;;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0;
+    z-index: 1;
+    backdrop-filter: blur(5px);
+    @include smoothTransition;
+    & a{
+        text-decoration: none;
+        color:$secondColor;
+        font-weight: 700;
+        font-size: 1.1rem;
+        @include smoothTransition;
+        &:hover {
+            color: $fourthColor;
+        }
+    }
+    & li {
+        @include smoothTransition;
+        transform:translateX(-100vw);
+    }
+}
+
+.open {
+   // transform: translateY(0);
+   bottom: 50%;
+   & li {
+       transform: translateX(0);
+   }
+}
+
+//RESPONSIVNESS desktop second
+@include media-m {
+    header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        color: white;
+        background-color: $primeColor;
+    }
+    .menu__btn{
+       display: none;
+    }
+    
+    .menu {
+        position: relative;
+        top:0;
+        bottom: 0;
+        flex-direction: row;
+        min-width: 500px;
+
+        & li {
+            transform: translateX(0);
+            margin:auto;
+        }
+    }
+}
+
+.when__loggedin {
+    display: none;
+}
+
+.when__loggedout {
+    display: block;
+}
+
+body.loggedIn {
+    & .when__loggedin {
+        display: block;
+    }
+    & .when__loggedout {
+        display: none;
+    }
+}
+
+.cta {
+margin:auto;
+}

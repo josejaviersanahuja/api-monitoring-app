@@ -1,0 +1,13 @@
+@use '../abstracts/' as *;
+footer {
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    width:100vw;
+    background-color: rgba($color: $primeColor, $alpha: 0.9);
+    color: $secondColor;
+    z-index: 2;
+}
+.copyright {
+    margin: 0 auto;
+}

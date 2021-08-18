@@ -1,0 +1,76 @@
+<h1 class="title">Sign Up</h1>
+
+<div class="form__wrapper">
+  <hr/>
+  <h2 class="subtitle">Made Simple</h2>
+  <form class="form" id="accountCreate" action="/api/users" method="POST">
+    <fieldset class="form__fieldset">
+      <legend>Users data</legend>
+      <div class="form__fromError"></div>
+      <div class="form__inputWrapper">
+        <div class="form__inputLabel">First Name</div>
+        <input
+          type="text"
+          name="firstName"
+          placeholder="Jhon"
+          onkeyup="handleSignUpButton()"
+        />
+      </div>
+      <div class="form__inputWrapper">
+        <div class="form__inputLabel">Last Name</div>
+        <input
+          type="text"
+          name="lastName"
+          placeholder="Smith"
+          onkeyup="handleSignUpButton()"
+        />
+      </div>
+      <div class="form__inputWrapper">
+        <div class="form__inputLabel">Phone Number (with country code)</div>
+        <span id="form__plus">+</span>
+        <input
+          type="text"
+          name="phone"
+          placeholder="34666666666 eleven digits"
+          onkeyup="handleSignUpButton()"
+        />
+        <span id="form__validPhone" style="visibility:hidden;">OK</span>
+      </div>
+      <div class="form__inputWrapper">
+        <div class="form__inputLabel">Choose a Password</div>
+        <input
+          type="password"
+          name="password"
+          placeholder="Make it a god one"
+          onkeyup="handleSignUpButton()"
+        />
+      </div>
+      <div class="form__inputWrapper">
+        <div class="form__inputLabel">Validate the Password</div>
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Repeat the same password"
+          onkeyup="handleSignUpButton()"
+        />
+        <span id="form__validPassword" style="visibility:hidden;">OK</span>
+      </div>
+      <div class="form__inputWrapper">
+        <div class="form__inputLabel">
+          Do you agree to the terms and conditions?
+        </div>
+        <input
+          type="checkbox"
+          name="tosAgreement"
+          value="agree"
+          onclick="handleSignUpButton()"
+        />
+      </div>
+      <div class="form__inputWrapper ">
+        <button type="submit" class="cta blue" id="form__button" disabled>
+          Get Started
+        </button>
+      </div>
+    </fieldset>
+  </form>
+</div>

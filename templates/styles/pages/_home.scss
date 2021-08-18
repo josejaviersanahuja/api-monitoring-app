@@ -1,0 +1,54 @@
+@use '../abstracts/' as *;
+
+.index {
+@include mainBody;
+}
+
+
+.title{
+    margin-top: 1rem;   
+}
+
+.subtitle{
+    margin: 1rem 0;
+}
+
+.blurb {
+    background-color: darken($secondColor,10%);
+    max-width:500px;
+    border-radius: 10px;
+    font-weight: 700;
+    margin: 1rem ;
+    border:1px solid $fourthColor;
+    & li {
+        list-style: none;
+    }
+}
+.ctaWrapper{
+    
+    max-width: 500px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin:1rem 0
+}
+.cta {
+    @include linkButton;
+}
+
+.green {
+    background-color: $thirdColor;
+    @include linkColorDefaultStyle;
+}
+.blue {
+    background-color: $fourthColor;
+    @include linkColorDefaultStyle;
+}
+.red{
+    background-color: red;
+    @include linkColorDefaultStyle;
+}
+.border{
+    border: 1px solid $primeColor;
+    @include linkBorderDefaultStyle;
+}

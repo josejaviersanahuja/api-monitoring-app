@@ -1,0 +1,84 @@
+@use './colors' as *;
+@mixin cleanBotonStyle {
+    isolation: isolate;
+    position:relative;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+@mixin mainBody{
+    
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y:auto;
+    &::-webkit-scrollbar{
+        display: none;
+        width: min-content;
+    }
+} 
+
+@mixin linkButton {
+    border-radius: 10px;
+    padding:0.5em;
+    font-size: 1.2em;
+    font-weight: 700;
+    text-decoration: none;
+    color: $primeColor; 
+}
+
+@mixin linkButtonHover {
+    box-shadow: 2px 2px 0 0 $primeColor;
+    color: $secondColor;
+    cursor: pointer;
+}
+@mixin linkBorderButtonHover {
+    box-shadow: 2px 2px 0 0 $primeColor;
+    color: $thirdColor;
+    cursor: pointer;
+}
+
+@mixin linkColorDefaultStyle {
+    @include smoothTransition;
+    &:hover {
+        @include linkButtonHover;
+    }
+    &:focus{
+        outline: none;
+        @include linkButtonHover;
+    }
+}
+@mixin linkBorderDefaultStyle {
+    @include smoothTransition;
+    &:hover {
+        @include linkBorderButtonHover;
+    }
+    &:focus{
+        outline: none;
+        @include linkBorderButtonHover;
+    }
+}
+
+@mixin smoothTransition {
+    transition: all 0.5s ease-in-out;
+}
+
+/* 
+    MIXINS PARA RESPONSIVENESS
+*/
+@mixin media-m {
+    @media screen and (min-width:768px) {
+     @content;   
+    }
+}
+
+@mixin media-l {
+    @media screen and (min-width:1200px) {
+     @content;   
+    }
+}

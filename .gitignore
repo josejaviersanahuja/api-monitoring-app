@@ -1,0 +1,5 @@
+/.data
+/.logs
+/https
+node_modules
+.env

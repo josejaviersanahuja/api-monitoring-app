@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- General Settings-->
+    <meta charset="UTF-8">
+    <meta http-equiv="content-language" content="es-ES">
+    <base href="{global.baseUrl}" />
+    <!-- Meta Tags-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{head.description}">
+    <title>{head.title} | {global.appName}</title>
+    <!-- Static Assets -->
+    <link rel="icon" type="image/x-icon"  href="public/favicon.ico"/>
+    <script type="text/javascript" charset="utf-8" src="public/app.js"></script>
+    <link rel="stylesheet" type="text/css" href="public/index.css" >
+</head>
+<body class="{body.class}">
+    <header>
+        <!--LOGO-->
+        <a class="logo" href="/" ><img src="public/logoOliva.png" alt="logo"/></a>
+        <!--Navigation-->
+        <button class="menu__btn" onclick="handleMenuBtnClick()"><div class="menu__btn__lines"></div></button>
+        <ul class="menu">
+            <li>
+                <a href="/" >Home</a>
+            </li>
+            <li class="when__loggedout">
+                <a href="/account/create" class="when__loggedout">Signup</a>
+            </li>
+            <li class="when__loggedout">
+                <a href="/session/create" class="when__loggedout">Login</a>
+            </li>
+            <li class="when__loggedin">
+                <a href="/checks/all" class="when__loggedin">Dashboard</a>
+            </li>
+            <li class="when__loggedin">
+                <a href="/account/edit" class="when__loggedin">Account Settings</a>
+            </li>
+            <li class="when__loggedin">
+                <a href="/" class="when__loggedin" id='logout__btn'>Logout</a>
+            </li>
+        </ul>
+    </header>
+    <main>
+

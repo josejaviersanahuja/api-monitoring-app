@@ -1,0 +1,41 @@
+@use '../abstracts/' as *;
+
+.dashboard {
+    @include mainBody;
+}
+
+#checksListTable, tr, th ,td {
+    color:$primeColor;
+    border-collapse:collapse;
+    border: 1px solid $primeColor;
+    margin: 0;
+    padding: 0.5rem;
+}
+
+#checksListTable {
+    & .checkRow:nth-child(2n) {
+        background-color: $secondColor;
+    }
+
+    & .checkRow:nth-child(2n+1) {
+        background-color: darken($secondColor, 10%);
+    }
+    & td:nth-child(5n+4), td:nth-child(5n+1){
+        font-weight: 700;
+    }
+}
+th {
+    background-color: $thirdColor;
+}
+
+
+
+#checksListTable {
+    width:80%;
+    margin: 1rem 0 3rem 0;
+    border-radius:10px;
+}
+
+#noChecksMessage, #createCheckCTA{
+    display:none;
+}
