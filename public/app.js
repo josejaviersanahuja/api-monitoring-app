@@ -474,22 +474,16 @@ app.loadLogAlertsPage = function(){
               const td1 = tr.insertCell(1);
               const td2 = tr.insertCell(2);
               const td3 = tr.insertCell(3);
-              const td4 = tr.insertCell(4);
-              const td5 = tr.insertCell(5);
-              const td6 = tr.insertCell(6);
-              td0.innerHTML = log.method;
-              td1.innerHTML = log.protocol+'://';
-              td2.innerHTML = log.url
-              td3.innerHTML = log.lastChecked // TODO añadir el formato
-              td4.innerHTML = log.state
+              td0.innerHTML = log.lastChecked // TODO añadir el formato
+              td1.innerHTML = log.state
               //logic to add an error
               let errorCell = ''
               if(Object.keys(log.error).length >0){
                 errorCell= log.error.value
               }
               //
-              td5.innerHTML = errorCell
-              td6.innerHTML = log.responseCode
+              td2.innerHTML = errorCell
+              td3.innerHTML = log.responseCode
             })
           } else {
             // Show 'you have no checks' message
