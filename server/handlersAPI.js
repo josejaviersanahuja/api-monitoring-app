@@ -25,7 +25,7 @@ handler.notFound = function (data, callback) {
 };
 
 handler.users = function (data, callback) {
-  //figure out which methods to trigger
+  //figure out which methods to 
   const acceptableMethods = ["post", "get", "put", "delete"];
   if (acceptableMethods.includes(data.method)) {
     handler._users[data.method](data, callback);
@@ -126,7 +126,7 @@ handler._users.get = async function (data, callback) {
           const user= await usersModel.findOne({phone:phone})
           // removed the hashed password from the user object
           delete user.hashedPassword
-          callback(200, data)
+          callback(200, user)
         } catch (error) {
           callback(404);
         }
@@ -754,4 +754,45 @@ handler.testErrors = function(data, callback) {
   const err = new Error()
   throw err
 }
+
+//GET LOGS
+handler.logs = function (data, callback) {
+  //figure out which methods to trigger
+  if (data.method==="get") {
+    //required data: phone and check-url as querystrings
+    //require header token.
+    //Check that the phone is valid
+    const phone =
+    typeof data.queryStringObject.get("phone") == "string" &&
+    data.queryStringObject.get("phone").trim().length === 11
+      ? data.queryStringObject.get("phone").trim()
+      : false;
+    //Check that the url is valid
+    const url =
+    typeof data.queryStringObject.get("url") == "string" &&
+    data.queryStringObject.get("url").trim().length > 0
+      ? data.queryStringObject.get("url").trim()
+      : false;
+    // get the token and validate the user
+    const token =
+      typeof data.headers.token == "string" ? data.headers.token : false;
+
+    handler._tokens.verifyToken(token, phone, async function (tokenIsValid) {
+      if (tokenIsValid) {
+        // obtener de la DB logs, el listado de alerts que han habido (en los ultimos 7 días que es el tiempo de vida de estos logs)
+        try {
+          const logList = await logsModel.find({url: url, userPhone:phone})
+          callback(200, logList)
+        } catch (error) {
+          callback(500)
+        }
+      } else {
+        callback(403, {Error:'token missing or not valid'})
+      }
+    })
+  } else {
+    callback(405); // the method is not acceptable
+  }
+};
+
 module.exports = handler;

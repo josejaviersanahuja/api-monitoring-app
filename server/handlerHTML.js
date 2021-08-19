@@ -268,5 +268,37 @@ handler.checksEdit = function(data, callback){
 		callback(405,undefined,CONTENT_TYPE)
 	}
 }
+
+// log details
+handler.log = function(data, callback){
+	//Reject everything but GET
+	if (data.method === "get") {
+    //Check that the url is valid
+    const url =
+    typeof data.queryStringObject.get("url") == "string" &&
+    data.queryStringObject.get("url").trim().length > 0
+      ? data.queryStringObject.get("url").trim()
+      : false;
+    
+		//Prepare data for interpolation
+		const templateData = {
+			'head.title':'Log of '+url,
+			'head.description':'Last 7 days alerts when the url changed from up to down or viceversa',
+			'body.class':'log',
+			'clase.url':url
+		}
+
+		//Read in  a template as a string
+		helpers.getTemplate('log', templateData ,function(err, str){
+			if (!err && str) {
+				callback(200, str, CONTENT_TYPE)
+			} else {
+				callback(500, 'Something is wrong with the template', CONTENT_TYPE)	
+			}
+		})
+	} else {
+		callback(405,undefined,CONTENT_TYPE)
+	}
+}
 //Exporting the module
 module.exports = handler

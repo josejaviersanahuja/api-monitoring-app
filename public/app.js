@@ -178,7 +178,7 @@ app.bindForms = function () {
             nameOfElement = 'id';
           }
 
-          // todo input menos el boton, fieldset ni con nombre confirmePassword
+          // all input menos el boton, fieldset ni con nombre confirmePassword
           if (
             element.type !== "submit" &&
             element.type !== "fieldset" &&
@@ -231,7 +231,6 @@ app.bindForms = function () {
 
               //Set the error Message field with the error text
               formErrorMessage.innerHTML = errorMessage;
-
               //show or unhide the error
               formErrorMessage.style.display = "block";
               // if there is no error
@@ -361,7 +360,7 @@ app.tokenRenewalLoop = function () {
   setInterval(function () {
     app.renewToken(function (err) {
       if (!err) {
-        console.log("Token renewd successfully at ", Date.now());
+        //console.log("Token renewd successfully at ", Date.now());
       }
     });
   }, 1000 * 120);
@@ -439,7 +438,84 @@ app.loadDataOnPage = function () {
   if(primaryClass == 'checksEdit'){
     app.loadChecksEditPage();
   }
+  // Logic for log alerts page
+  if(primaryClass == 'log'){
+    app.loadLogAlertsPage();
+  }
 };
+
+// Load the account edit page specifically
+app.loadLogAlertsPage = function(){
+  // Get the phone number from the current token, or log the user out if none is there
+  const phone = typeof(app.config.sessionToken.phone) == 'string' ? app.config.sessionToken.phone : false;
+  if(phone){
+    //GET the url from the class of the table
+    const tabla = document.getElementsByTagName('table')[0]
+    const urlToFetch =  tabla.classList[0]
+    // El valor de la url ahora esta en tabla[0].classList[0], ver console.log(tabla[0].classList[0]);
+    // Fetch the user data
+    const queryStringObject = {
+      'phone' : phone,
+      'url' : urlToFetch
+    };
+    app.client.request(undefined,'api/logs','GET',queryStringObject,undefined,function(statusCode,responsePayload){
+      if(statusCode == 200){
+
+        // Determine if there are log alerts history
+        if (Array.isArray(responsePayload)) {
+          if(responsePayload.length >0){
+            // Show each created LOG as a new row in the table
+            responsePayload.forEach(function(log){
+              // Make the log data into a table row
+              const table = document.getElementById("checksListTable");
+              const tr = table.insertRow(-1);
+              tr.classList.add('checkRow');
+              const td0 = tr.insertCell(0);
+              const td1 = tr.insertCell(1);
+              const td2 = tr.insertCell(2);
+              const td3 = tr.insertCell(3);
+              const td4 = tr.insertCell(4);
+              const td5 = tr.insertCell(5);
+              const td6 = tr.insertCell(6);
+              td0.innerHTML = log.method;
+              td1.innerHTML = log.protocol+'://';
+              td2.innerHTML = log.url
+              td3.innerHTML = log.lastChecked // TODO añadir el formato
+              td4.innerHTML = log.state
+              //logic to add an error
+              let errorCell = ''
+              if(Object.keys(log.error).length >0){
+                errorCell= log.error.value
+              }
+              //
+              td5.innerHTML = errorCell
+              td6.innerHTML = log.responseCode
+            })
+          } else {
+            // Show 'you have no checks' message
+            document.getElementById("noChecksMessage").style.display = 'table-row';
+  
+            // Show the createCheck CTA
+            document.getElementById("createCheckCTA").style.display = 'block';
+  
+          } 
+        } else {
+          // Show 'you have no checks' message
+          document.getElementById("noChecksMessage").style.display = 'table-row';
+
+          // Show the createCheck CTA
+          document.getElementById("createCheckCTA").style.display = 'block';
+
+        }
+      } else {
+        // If the request comes back as something other than 200, log the user out (on the assumption that the api is temporarily down or the users token is bad)
+        app.logUserOut();
+      }
+    });
+  } else {
+    app.logUserOut();
+  }
+}
 
 // Load the account edit page specifically
 app.loadAccountEditPage = function () {
@@ -457,7 +533,7 @@ app.loadAccountEditPage = function () {
     const queryStringObject = {
       phone: phone,
     };
-
+    
     app.client.request(
       undefined,
       "api/users",
@@ -528,7 +604,17 @@ app.loadChecksListPage = function(){
                 const td4 = tr.insertCell(4);
                 td0.innerHTML = responsePayload.method.toUpperCase();
                 td1.innerHTML = responsePayload.protocol+'://';
-                td2.innerHTML = responsePayload.url;
+                //LOGIC TO CHECK IF responsePayload.url ENDS WITH / or no
+                const urlLength = responsePayload.url.length
+                const lastChar = responsePayload.url.charAt(urlLength-1)
+                let urlForLink=''
+                if(lastChar==="/"){
+                  urlForLink=responsePayload.url.slice(0, urlLength-1)
+                } else {
+                  urlForLink = responsePayload.url
+                }
+                //END OF THIS LOGIC
+                td2.innerHTML = `<a href="/log?url=${urlForLink}">${responsePayload.url}</a>`
                 const state = typeof(responsePayload.state) == 'string' ? responsePayload.state : 'unknown';
                 td3.innerHTML = state;
                 td4.innerHTML = '<a href="/checks/edit?id='+responsePayload.id+'">View / Edit / Delete</a>';

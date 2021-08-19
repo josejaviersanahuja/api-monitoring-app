@@ -126,10 +126,11 @@ server.processHandlerResponse = (res, method, trimmedPath, statusCode, payload, 
     //return the response    
     res.writeHead(statusCode)
     res.end(payloadString)
+    //El famoso morgan
     if (statusCode === 200) {
-      console.log('\x1b[32m%s\x1b[0m','returning response: ', statusCode);  
+      //console.log('\x1b[32m%s\x1b[0m','returning response: ', statusCode);  
     } else {
-      console.log('\x1b[31m%s\x1b[0m','returning response: ', statusCode, payloadString);
+      //console.log('\x1b[31m%s\x1b[0m','returning response: ', statusCode, payloadString);
     }    
 }
 
@@ -154,7 +155,9 @@ server.router = {
     'api/users': handlerAPI.users,
     'api/tokens': handlerAPI.tokens,
     'api/checks': handlerAPI.checks,
-    'test/errors':handlerAPI.testErrors
+    'test/errors':handlerAPI.testErrors,
+    'api/logs':handlerAPI.logs,
+    'log':handlerHTML.log
 };
 
 //------------------------------------------------------------------------------------------------------------
@@ -164,7 +167,7 @@ server.init = function(){
     // Start the server, and have it listen on port 3000
     const port = process.env.PORT || config.httpPort
     server.httpServer.listen(port, () => {
-        console.log('\x1b[35m%s\x1b[0m',"Server up and listening on port: " + config.httpPort +' in ' + config.envName + ' mode');
+        console.log('\x1b[35m%s\x1b[0m',"Server up and listening on port: " + port +' in ' + config.envName + ' mode');
     });  
 }
 
