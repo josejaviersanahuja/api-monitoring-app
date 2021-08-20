@@ -776,7 +776,6 @@ handler.logs = function (data, callback) {
     // get the token and validate the user
     const token =
       typeof data.headers.token == "string" ? data.headers.token : false;
-
     handler._tokens.verifyToken(token, phone, async function (tokenIsValid) {
       if (tokenIsValid) {
         // obtener de la DB logs, el listado de alerts que han habido (en los ultimos 7 días que es el tiempo de vida de estos logs)

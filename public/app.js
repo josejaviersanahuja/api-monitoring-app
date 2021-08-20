@@ -460,7 +460,7 @@ app.loadLogAlertsPage = function(){
     };
     app.client.request(undefined,'api/logs','GET',queryStringObject,undefined,function(statusCode,responsePayload){
       if(statusCode == 200){
-
+        console.log(responsePayload,'---');
         // Determine if there are log alerts history
         if (Array.isArray(responsePayload)) {
           if(responsePayload.length >0){
@@ -489,17 +489,17 @@ app.loadLogAlertsPage = function(){
             // Show 'you have no checks' message
             document.getElementById("noChecksMessage").style.display = 'table-row';
   
-            // Show the createCheck CTA
+          /*   // Show the createCheck CTA
             document.getElementById("createCheckCTA").style.display = 'block';
-  
+   */
           } 
         } else {
           // Show 'you have no checks' message
           document.getElementById("noChecksMessage").style.display = 'table-row';
-
+/* 
           // Show the createCheck CTA
           document.getElementById("createCheckCTA").style.display = 'block';
-
+ */
         }
       } else {
         // If the request comes back as something other than 200, log the user out (on the assumption that the api is temporarily down or the users token is bad)
