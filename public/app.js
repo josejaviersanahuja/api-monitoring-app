@@ -474,7 +474,8 @@ app.loadLogAlertsPage = function(){
               const td1 = tr.insertCell(1);
               const td2 = tr.insertCell(2);
               const td3 = tr.insertCell(3);
-              td0.innerHTML = log.lastChecked // TODO añadir el formato
+              const dateOfLog = new Date(log.lastChecked)
+              td0.innerHTML = dateOfLog.toUTCString() // TODO añadir el formato
               td1.innerHTML = log.state
               //logic to add an error
               let errorCell = ''

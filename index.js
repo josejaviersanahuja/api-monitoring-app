@@ -8,7 +8,7 @@ process.env.NODE_ENV = typeof process.env.NODE_ENV == 'string' ? process.env.NOD
 const server = require('./server/server')
 const workers = require('./lib/workers')
 const {dotEnvReader} = require('./lib/dotEnvReader')
-const cli = require('./lib/cli')
+
 
 // app container
 const app = {}
