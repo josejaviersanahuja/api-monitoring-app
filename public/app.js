@@ -809,6 +809,17 @@ const handleUpdatePasswordButton = () => {
   }
 };
 
+const toggleInfoTable = () => {
+  const infoTable = document.getElementById('infotable')
+  const infoTableStyle = infoTable.style.display
+  console.log(infoTableStyle);
+  if (infoTableStyle === 'none') {
+    infoTable.style.display = 'block'
+  } else {
+    infoTable.style.display = 'none'
+  }
+}
+
 const DEFAULT_RESPONSE = {
   404: "Not Found Error. (dafault message)",
   403: "Operation Forbidden, normally happens when credentials are needed like a loggedin user. (dafault message)",

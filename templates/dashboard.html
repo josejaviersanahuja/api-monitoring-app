@@ -1,6 +1,14 @@
 
+<div 
+  style=" border: 1px solid black; border-radius: 50%;margin-left: auto; position: relative; top: 0.5rem; right: 2rem; width:30px; height: 30px; display: flex; cursor: pointer;" 
+  title="Click on the URL to navigate to the log history, which is the logs where a special event happened while monitoring, like a server down, or a server going up again."
+  onclick="toggleInfoTable()"
+>
+  <i class="fas fa-info" style="margin: auto;" ></i>
+</div>
+<p class="blurb" id="infotable" style="display: none;">Click on the URL to navigate to the log history, which is the logs where a special event happened while monitoring, like a server down, or a server going up again.</p>
 <h1 class="title">{head.title}</h1>
-<h2 class="subtitle">{head.description}</h2>
+<h2 class="subtitle">{head.description} </h2>
 
 <hr />
 <div class="tableWrapper">
