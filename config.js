@@ -40,7 +40,7 @@ enviroments.production = {
       'appName':'UptimeChecker',
       'companyName':'zitrojj.dev',
       'yearCreated':'2021',
-      'baseUrl': `http://localhost:5000`
+      'baseUrl': `https://mighty-headland-82380.herokuapp.com/`
     }
 };
 

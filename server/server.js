@@ -30,7 +30,7 @@ const server = {}
  server.unifiedServer = (req, res) => {
  
   //get the url and pars it
-  const parsedUrl = new URL(req.url, `http://${req.headers.host}`) // url.parse(req.url, true); // second argument accepts another dependencies we haven´t used (query) that's why we pass true unti we get there
+  const parsedUrl = new URL(req.url, `https://${req.headers.host}`) // url.parse(req.url, true); // second argument accepts another dependencies we haven´t used (query) that's why we pass true unti we get there
 
   // geth the path
   const path = parsedUrl.pathname; // http:localhost:3000/pokemon pathname would be /pokemon
