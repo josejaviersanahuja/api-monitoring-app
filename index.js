@@ -14,18 +14,18 @@ const {dotEnvReader} = require('./lib/dotEnvReader')
 const app = {}
 
 // Initializing an app starts by initializing the server
-app.init = function(callback){
+app.init = function(){
   require('./mongo')  
   server.init()
   workers.init()
     
-  callback()
+ // callback()
 
 }
 //envolvemos el app init en nuestro dotENV para que las variables de entorno carguen antes de iniciar la app
-if (require.main===module) { //solo se ejecuta si la ejecucion se pide por CLI node index.js por ejemplo
+/* if (require.main===module) { //solo se ejecuta si la ejecucion se pide por CLI node index.js por ejemplo
   dotEnvReader(app.init, function(){})  
-}
+} */
 //CUANDO NO SE EJECUTA? cuando desde nuestro test/api.js llamamos a la app
-
+app.init()
 module.exports = app

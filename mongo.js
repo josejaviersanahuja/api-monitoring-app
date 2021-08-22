@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const { MONGODB_URI, MONGODB_URI_TEST, NODE_ENV } = process.env
 
-const connectionString = NODE_ENV === 'testing' ? MONGODB_URI_TEST : MONGODB_URI
+const connectionString = NODE_ENV === 'testing' ? MONGODB_URI_TEST+'&w=majority' : MONGODB_URI+'&w=majority'
 // primera coneccion a mongodb
 
 mongoose.connect(connectionString, {
