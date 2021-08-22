@@ -460,7 +460,7 @@ app.loadLogAlertsPage = function(){
     };
     app.client.request(undefined,'api/logs','GET',queryStringObject,undefined,function(statusCode,responsePayload){
       if(statusCode == 200){
-        console.log(responsePayload,'---');
+        
         // Determine if there are log alerts history
         if (Array.isArray(responsePayload)) {
           if(responsePayload.length >0){
@@ -812,7 +812,7 @@ const handleUpdatePasswordButton = () => {
 const toggleInfoTable = () => {
   const infoTable = document.getElementById('infotable')
   const infoTableStyle = infoTable.style.display
-  console.log(infoTableStyle);
+  
   if (infoTableStyle === 'none') {
     infoTable.style.display = 'block'
   } else {

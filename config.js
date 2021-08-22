@@ -43,7 +43,7 @@ enviroments.production = {
       'baseUrl': `https://mighty-headland-82380.herokuapp.com/`
     }
 };
-
+//https://mighty-headland-82380.herokuapp.com/
 enviroments.testing = {
   'httpPort': 4000,
   'httpsPort': 4001,
